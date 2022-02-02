@@ -20,6 +20,7 @@ fn main() -> Result<()> {
     dbg!(game.guess("HEllo\n"));
     dbg!(game.guess("HEllo\n"));
     dbg!(game.guess("HEllo\n"));
+    dbg!(game.current_result());
     println!("Hello, world!");
     Ok(())
 }

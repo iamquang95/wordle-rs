@@ -1,5 +1,6 @@
 use crate::{WordsLib, WORDS_LIB};
 use rand::Rng;
+use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 
@@ -12,6 +13,7 @@ pub struct Game {
 impl Game {
     pub fn new(num_guesses: usize) -> Result<Game> {
         let word = WORDS_LIB.random_word()?;
+        dbg!(&word);
         let state = GameState {
             guesses: vec![],
             state: State::Playing,
@@ -36,6 +38,48 @@ impl Game {
         Ok(state.state.clone())
     }
 
+    pub fn current_result(&self) -> GameResult {
+        let char_position = self
+            .word
+            .clone()
+            .into_bytes()
+            .iter()
+            .enumerate()
+            .map(|(idx, ch)| (*ch, idx))
+            .collect::<HashMap<u8, usize>>();
+        let judged_guesses = self
+            .state
+            .guesses
+            .iter()
+            .map(|guess| {
+                let result = guess
+                    .clone()
+                    .into_bytes()
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, ch)| match char_position.get(ch) {
+                        Some(w_idx) => {
+                            if *w_idx == idx {
+                                JudgedChar::Correct
+                            } else {
+                                JudgedChar::WrongPlace
+                            }
+                        }
+                        None => JudgedChar::Wrong,
+                    })
+                    .collect::<Vec<JudgedChar>>();
+                JudgedGuess {
+                    guess: guess.clone(),
+                    result,
+                }
+            })
+            .collect::<Vec<JudgedGuess>>();
+        GameResult {
+            judged_guesses,
+            state: self.state.state.clone(),
+        }
+    }
+
     fn check_valid_guess(&self, word: &str) -> Result<()> {
         match &self.state.state {
             State::Lose | State::Win => return Err(anyhow!("Game ended")),
@@ -48,6 +92,26 @@ impl Game {
     }
 }
 
+#[derive(Debug)]
+pub struct GameResult {
+    judged_guesses: Vec<JudgedGuess>,
+    state: State,
+}
+
+#[derive(Debug)]
+pub struct JudgedGuess {
+    guess: String,
+    result: Vec<JudgedChar>,
+}
+
+#[derive(Debug)]
+pub enum JudgedChar {
+    Correct,
+    WrongPlace,
+    Wrong,
+}
+
+#[derive(Debug)]
 struct GameState {
     guesses: Vec<String>,
     state: State,
