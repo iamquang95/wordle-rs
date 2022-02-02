@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 
+use std::io;
 use crate::game::Game;
 use crate::game_ui::GameUI;
 use crate::words_lib::WordsLib;
@@ -17,13 +18,17 @@ lazy_static! {
 
 fn main() -> Result<()> {
     let mut game = Game::new(5)?;
-    dbg!(game.guess("HEllo\n"));
-    dbg!(game.guess("HEllo\n"));
-    dbg!(game.guess("HEllo\n"));
-    println!("{}", GameUI::display_board(&game));
-    dbg!(game.guess("HEllo\n"));
-    dbg!(game.guess("HEllo\n"));
-    println!("{}", GameUI::display_board(&game));
-    println!("Hello, world!");
-    Ok(())
+    loop {
+        println!("{}", GameUI::display_board(&game));
+        let mut buffer = String::new();
+        io::stdin().read_line(&mut buffer)?;
+        match game.guess(buffer.as_str()) {
+            Ok(state) => {
+                dbg!(state);
+            },
+            Err(err) => {
+                dbg!(err);
+            }
+        }
+    }
 }
