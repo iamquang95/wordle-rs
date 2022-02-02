@@ -14,7 +14,12 @@ lazy_static! {
 }
 
 fn main() -> Result<()> {
-    let game = Game::new(5)?;
+    let mut game = Game::new(5)?;
+    dbg!(game.guess("HEllo\n"));
+    dbg!(game.guess("HEllo\n"));
+    dbg!(game.guess("HEllo\n"));
+    dbg!(game.guess("HEllo\n"));
+    dbg!(game.guess("HEllo\n"));
     println!("Hello, world!");
     Ok(())
 }
