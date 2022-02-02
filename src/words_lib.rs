@@ -3,7 +3,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use rand::Rng;
 
 pub struct WordsLib {
     words: HashSet<String>,
@@ -21,7 +22,7 @@ impl WordsLib {
                 break;
             }
             if word.len() > 0 {
-                words.insert(word);
+                words.insert(word.trim().to_ascii_uppercase());
             }
         }
         Ok(WordsLib { words })
@@ -42,5 +43,16 @@ impl WordsLib {
 
     pub fn words_size(&self) -> usize {
         self.words.len()
+    }
+
+    pub fn random_word(&self) -> Result<String> {
+        let mut rng = rand::thread_rng();
+        let word_idx = rng.gen_range(0..self.words_size());
+        let x = self
+            .words
+            .iter()
+            .nth(word_idx)
+            .ok_or(anyhow!("Failed to random word"))?;
+        Ok(x.clone())
     }
 }
