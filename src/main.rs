@@ -2,10 +2,12 @@
 extern crate lazy_static;
 
 use crate::game::Game;
+use crate::game_ui::GameUI;
 use crate::words_lib::WordsLib;
 use anyhow::Result;
 
 mod game;
+mod game_ui;
 mod words_lib;
 
 lazy_static! {
@@ -18,9 +20,10 @@ fn main() -> Result<()> {
     dbg!(game.guess("HEllo\n"));
     dbg!(game.guess("HEllo\n"));
     dbg!(game.guess("HEllo\n"));
+    println!("{}", GameUI::display_board(&game));
     dbg!(game.guess("HEllo\n"));
     dbg!(game.guess("HEllo\n"));
-    dbg!(game.current_result());
+    println!("{}", GameUI::display_board(&game));
     println!("Hello, world!");
     Ok(())
 }

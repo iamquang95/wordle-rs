@@ -6,7 +6,7 @@ use anyhow::{anyhow, Result};
 
 pub struct Game {
     word: String,
-    num_guesses: usize,
+    pub num_guesses: usize,
     state: GameState,
 }
 
@@ -36,6 +36,10 @@ impl Game {
             state.state = State::Lose
         }
         Ok(state.state.clone())
+    }
+
+    pub fn word_len(&self) -> usize {
+        self.word.len()
     }
 
     pub fn current_result(&self) -> GameResult {
@@ -94,24 +98,24 @@ impl Game {
 
 #[derive(Debug)]
 pub struct GameResult {
-    judged_guesses: Vec<JudgedGuess>,
-    state: State,
+    pub judged_guesses: Vec<JudgedGuess>,
+    pub state: State,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct JudgedGuess {
-    guess: String,
-    result: Vec<JudgedChar>,
+    pub guess: String,
+    pub result: Vec<JudgedChar>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum JudgedChar {
     Correct,
     WrongPlace,
     Wrong,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct GameState {
     guesses: Vec<String>,
     state: State,
