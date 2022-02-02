@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate lazy_static;
 
-use std::io;
 use crate::game::Game;
 use crate::game_ui::GameUI;
 use crate::words_lib::WordsLib;
 use anyhow::Result;
+use std::io;
 
 mod game;
 mod game_ui;
@@ -25,7 +25,7 @@ fn main() -> Result<()> {
         match game.guess(buffer.as_str()) {
             Ok(state) => {
                 dbg!(state);
-            },
+            }
             Err(err) => {
                 dbg!(err);
             }

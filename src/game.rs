@@ -1,6 +1,5 @@
-use crate::{WordsLib, WORDS_LIB};
-use rand::Rng;
-use std::collections::HashMap;
+use crate::WORDS_LIB;
+use std::collections::HashSet;
 
 use anyhow::{anyhow, Result};
 
@@ -43,33 +42,23 @@ impl Game {
     }
 
     pub fn current_result(&self) -> GameResult {
-        let char_position = self
-            .word
-            .clone()
-            .into_bytes()
-            .iter()
-            .enumerate()
-            .map(|(idx, ch)| (*ch, idx))
-            .collect::<HashMap<u8, usize>>();
+        let existing_chars = self.word.clone().chars().collect::<HashSet<char>>();
         let judged_guesses = self
             .state
             .guesses
             .iter()
             .map(|guess| {
                 let result = guess
-                    .clone()
-                    .into_bytes()
-                    .iter()
-                    .enumerate()
-                    .map(|(idx, ch)| match char_position.get(ch) {
-                        Some(w_idx) => {
-                            if *w_idx == idx {
-                                JudgedChar::Correct
-                            } else {
-                                JudgedChar::WrongPlace
-                            }
+                    .chars()
+                    .zip(self.word.chars())
+                    .map(|(lhs, rhs)| {
+                        if lhs == rhs {
+                            JudgedChar::Correct
+                        } else if existing_chars.contains(&lhs) {
+                            JudgedChar::WrongPlace
+                        } else {
+                            JudgedChar::Wrong
                         }
-                        None => JudgedChar::Wrong,
                     })
                     .collect::<Vec<JudgedChar>>();
                 JudgedGuess {

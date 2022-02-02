@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Read};
-use std::path::Path;
+use std::io::{BufRead, BufReader};
 
 use anyhow::{anyhow, Result};
 use rand::Rng;
@@ -12,7 +11,7 @@ pub struct WordsLib {
 
 impl WordsLib {
     pub fn load(file_path: &str) -> Result<WordsLib> {
-        let mut file = File::open(file_path)?;
+        let file = File::open(file_path)?;
         let mut reader = BufReader::new(file);
         let mut words = HashSet::<String>::new();
         loop {
@@ -28,6 +27,7 @@ impl WordsLib {
         Ok(WordsLib { words })
     }
 
+    #[allow(dead_code)]
     pub fn merge(&self, another: &WordsLib) -> WordsLib {
         let words: HashSet<String> = self
             .words
