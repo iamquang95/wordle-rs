@@ -42,10 +42,6 @@ impl WordsLib {
         self.words.contains(word)
     }
 
-    pub fn words_size(&self) -> usize {
-        self.words.len()
-    }
-
     pub fn random_popular_word(&self) -> Result<String> {
         let mut rng = rand::thread_rng();
         let word_idx = rng.gen_range(0..self.popular_words.len());

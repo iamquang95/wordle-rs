@@ -23,39 +23,46 @@ fn main() -> Result<()> {
     let mut game = Game::new(5)?;
     let mut screen = AlternateScreen::from(stdout());
     let mut err: Option<anyhow::Error> = None;
+    let mut buffer = String::new();
     loop {
-        write!(screen, "{}", termion::cursor::Save);
-        write!(screen, "{}\n", GameUI::display_header(&game));
-        write!(screen, "{}\n", GameUI::display_board(&game));
-        write!(screen, "{}", termion::clear::AfterCursor);
-        write!(screen, "{}", termion::cursor::BlinkingUnderline);
+        write!(screen, "{}", termion::cursor::Save)?;
+        write!(screen, "{}\n", GameUI::display_header(&game))?;
+        write!(screen, "{}\n", GameUI::display_board(&game))?;
+        write!(screen, "{}", termion::clear::AfterCursor)?;
+        write!(screen, "{}", termion::cursor::BlinkingUnderline)?;
         if let Some(error) = &err {
-            write!(screen, "{}\n", error);
+            write!(screen, "{}\n", error)?;
         }
         screen.flush()?;
         match game.game_state() {
             State::Playing => {
-                let mut buffer = String::new();
                 io::stdin().read_line(&mut buffer)?;
                 if let Err(error) = game.guess(buffer.as_str()) {
                     err = Some(error);
                 } else {
                     err = None;
                 }
+                buffer.clear();
             }
             State::Lose => {
                 let word = game.get_word_after_game_end()?;
-                write!(screen, "Lose. Correct answer is: \"{}\".", word);
+                write!(screen, "Lose. Correct answer is: \"{}\".\n", word)?;
+                break;
             }
             State::Win => {
                 write!(
                     screen,
-                    "Correct. You guessed the word after {} turns.",
+                    "Correct. You guessed the word after {} turns.\n",
                     game.turn()
-                );
+                )?;
+                break;
             }
         }
         screen.flush()?;
-        write!(screen, "{}", termion::cursor::Restore);
+        write!(screen, "{}", termion::cursor::Restore)?;
     }
+    write!(screen, "Press ENTER to exit.")?;
+    screen.flush()?;
+    io::stdin().read_line(&mut buffer)?;
+    Ok(())
 }
