@@ -20,7 +20,7 @@ lazy_static! {
 }
 
 fn main() -> Result<()> {
-    let mut game = Game::new(5)?;
+    let mut game = Game::new(6)?;
     let mut screen = AlternateScreen::from(stdout());
     let mut err: Option<anyhow::Error> = None;
     let mut buffer = String::new();
@@ -31,7 +31,13 @@ fn main() -> Result<()> {
         write!(screen, "{}", termion::clear::AfterCursor)?;
         write!(screen, "{}", termion::cursor::BlinkingUnderline)?;
         if let Some(error) = &err {
-            write!(screen, "{}\n", error)?;
+            write!(
+                screen,
+                "{}{}{}\n",
+                termion::color::Fg(termion::color::LightRed),
+                error,
+                termion::color::Fg(termion::color::Reset)
+            )?;
         }
         screen.flush()?;
         match game.game_state() {

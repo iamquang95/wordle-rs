@@ -1,7 +1,9 @@
 [package]
 name = "wordle-rs"
+description = "Wordle game written in rust"
 version = "0.1.0"
 edition = "2021"
+authors = ["Quang Le <iamquang95@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0.53"
