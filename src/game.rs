@@ -12,7 +12,6 @@ pub struct Game {
 impl Game {
     pub fn new(num_guesses: usize) -> Result<Game> {
         let word = WORDS_LIB.random_word()?;
-        dbg!(&word);
         let state = GameState {
             guesses: vec![],
             state: State::Playing,
@@ -39,6 +38,10 @@ impl Game {
 
     pub fn word_len(&self) -> usize {
         self.word.len()
+    }
+
+    pub fn turn(&self) -> usize {
+        self.state.guesses.len()
     }
 
     pub fn current_result(&self) -> GameResult {

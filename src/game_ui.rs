@@ -35,6 +35,10 @@ impl GameUI {
         rows.join("\n")
     }
 
+    pub fn display_header(game: &Game) -> String {
+        format!("      Turn: {}/{}", game.turn(), game.num_guesses)
+    }
+
     fn styled_judged_char(ch: char, judge: &JudgedChar) -> String {
         let (bg, fg): (Box<dyn color::Color>, Box<dyn color::Color>) = match judge {
             JudgedChar::Wrong => (Box::new(color::Black), Box::new(color::White)),
