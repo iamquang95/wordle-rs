@@ -7,11 +7,22 @@ use rand::Rng;
 
 pub struct WordsLib {
     words: HashSet<String>,
+    popular_words: HashSet<String>,
 }
 
 impl WordsLib {
-    pub fn load(file_path: &str) -> Result<WordsLib> {
-        let file = File::open(file_path)?;
+    pub fn load(full_words: &str, popular_words: &str) -> Result<WordsLib> {
+        let words1 = WordsLib::load_words(full_words)?;
+        let words2 = WordsLib::load_words(popular_words)?;
+        let words = words1.union(&words2).map(|word| word.to_owned()).collect();
+        Ok(WordsLib {
+            words,
+            popular_words: words2,
+        })
+    }
+
+    fn load_words(path: &str) -> Result<HashSet<String>> {
+        let file = File::open(path)?;
         let mut reader = BufReader::new(file);
         let mut words = HashSet::<String>::new();
         loop {
@@ -24,17 +35,7 @@ impl WordsLib {
                 words.insert(word.trim().to_ascii_uppercase());
             }
         }
-        Ok(WordsLib { words })
-    }
-
-    #[allow(dead_code)]
-    pub fn merge(&self, another: &WordsLib) -> WordsLib {
-        let words: HashSet<String> = self
-            .words
-            .union(&another.words)
-            .map(|word| word.to_owned())
-            .collect();
-        WordsLib { words }
+        Ok(words)
     }
 
     pub fn contains(&self, word: &str) -> bool {
@@ -45,11 +46,11 @@ impl WordsLib {
         self.words.len()
     }
 
-    pub fn random_word(&self) -> Result<String> {
+    pub fn random_popular_word(&self) -> Result<String> {
         let mut rng = rand::thread_rng();
-        let word_idx = rng.gen_range(0..self.words_size());
+        let word_idx = rng.gen_range(0..self.popular_words.len());
         let x = self
-            .words
+            .popular_words
             .iter()
             .nth(word_idx)
             .ok_or(anyhow!("Failed to random word"))?;

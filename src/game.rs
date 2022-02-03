@@ -11,7 +11,7 @@ pub struct Game {
 
 impl Game {
     pub fn new(num_guesses: usize) -> Result<Game> {
-        let word = WORDS_LIB.random_word()?;
+        let word = WORDS_LIB.random_popular_word()?;
         let state = GameState {
             guesses: vec![],
             state: State::Playing,
@@ -42,6 +42,17 @@ impl Game {
 
     pub fn turn(&self) -> usize {
         self.state.guesses.len()
+    }
+
+    pub fn game_state(&self) -> State {
+        self.state.state.clone()
+    }
+
+    pub fn get_word_after_game_end(&self) -> Result<String> {
+        match self.state.state {
+            State::Playing => Err(anyhow!("Failed to get word before game endding")),
+            State::Lose | State::Win => Ok(self.word.clone()),
+        }
     }
 
     pub fn current_result(&self) -> GameResult {
@@ -82,7 +93,7 @@ impl Game {
             State::Playing => (),
         }
         if !WORDS_LIB.contains(word) {
-            return Err(anyhow!("Guessing word is not in the library"));
+            return Err(anyhow!("{} is not in the library", word));
         }
         Ok(())
     }

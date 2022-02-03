@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 
-use crate::game::Game;
+use crate::game::{Game, State};
 use crate::game_ui::GameUI;
 use crate::words_lib::WordsLib;
 use anyhow::Result;
@@ -15,29 +15,47 @@ mod words_lib;
 
 lazy_static! {
     static ref WORDS_LIB: WordsLib =
-        WordsLib::load("./assets/5-letters-word.data").expect("Failed to load words lib");
+        WordsLib::load("./assets/words.data", "./assets/popular-words.data")
+            .expect("Failed to load words lib");
 }
 
 fn main() -> Result<()> {
     let mut game = Game::new(5)?;
     let mut screen = AlternateScreen::from(stdout());
+    let mut err: Option<anyhow::Error> = None;
     loop {
         write!(screen, "{}", termion::cursor::Save);
         write!(screen, "{}\n", GameUI::display_header(&game));
         write!(screen, "{}\n", GameUI::display_board(&game));
-        write!(screen, "{}", termion::clear::CurrentLine);
+        write!(screen, "{}", termion::clear::AfterCursor);
         write!(screen, "{}", termion::cursor::BlinkingUnderline);
+        if let Some(error) = &err {
+            write!(screen, "{}\n", error);
+        }
         screen.flush()?;
-        let mut buffer = String::new();
-        io::stdin().read_line(&mut buffer)?;
-        match game.guess(buffer.as_str()) {
-            Ok(state) => {
-                dbg!(state);
+        match game.game_state() {
+            State::Playing => {
+                let mut buffer = String::new();
+                io::stdin().read_line(&mut buffer)?;
+                if let Err(error) = game.guess(buffer.as_str()) {
+                    err = Some(error);
+                } else {
+                    err = None;
+                }
             }
-            Err(err) => {
-                dbg!(err);
+            State::Lose => {
+                let word = game.get_word_after_game_end()?;
+                write!(screen, "Lose. Correct answer is: \"{}\".", word);
+            }
+            State::Win => {
+                write!(
+                    screen,
+                    "Correct. You guessed the word after {} turns.",
+                    game.turn()
+                );
             }
         }
+        screen.flush()?;
         write!(screen, "{}", termion::cursor::Restore);
     }
 }
